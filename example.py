@@ -1,5 +1,6 @@
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
+
 X = 'cat'
 Y = 'dog'
 
@@ -24,7 +25,7 @@ x = x.reshape((1,) + x.shape)
 
 i = 0
 
-for batch in datagen.flow(X,
+for batch in datagen.flow(x,
                 batch_size = 1,
                 save_to_dir= "preview",
                 save_prefix= Y,
