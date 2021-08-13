@@ -5,29 +5,30 @@ from keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropo
 import tensorflow as tf
 from tensorflow.keras import backend as K
 
+IMG_WIDTH, IMG_HEIGHT = 150, 150
 TRAIN_DATA_DIR = 'train'
 VALIDATION_DATA_DIR = 'validation'
 NB_TRAIN_SAMPLES = 20
 NB_VALIDATION_SAMPLES = 20
 EPOCHS = 50
-BATCH = 5
+BATCH_SIZE = 5
 
 def build_model():
   if K.image_data_format() == 'channels_first':
-    imput_shape = (3, IMG_WIDTH, IMG_HEIGHT)
+    input_shape = (3, IMG_WIDTH, IMG_HEIGHT)
   else:
-    imput_shape = (IMG_WIDTH, IMG_HEIGHT, 3)
+    input_shape = (IMG_WIDTH, IMG_HEIGHT, 3)
   
   model = Sequential()
-  model.add(Conv2D(32, (3,3), imput_shape=imput_shape))
+  model.add(Conv2D(32, (3,3), input_shape=input_shape))
   model.add(Activation('relu'))
   model.add(MaxPooling2D(pool_size=(2,2)))
 
-  model.add(Conv2D(32, (3,3), imput_shape=imput_shape))
+  model.add(Conv2D(32, (3,3), input_shape=input_shape))
   model.add(Activation('relu'))
   model.add(MaxPooling2D(pool_size=(2,2)))
 
-  model.add(Conv2D(64, (3,3), imput_shape=imput_shape))
+  model.add(Conv2D(64, (3,3), input_shape=input_shape))
   model.add(Activation('relu'))
   model.add(MaxPooling2D(pool_size=(2,2)))
 
@@ -38,23 +39,64 @@ def build_model():
   model.add(Dense(1))
   model.add(Activation('sigmoid'))
 
-  model.compile(loss = 'binary_crossentropy',
-                  optimize='resprop',
-                  metrics=['accuracy'])
 
-def train_model():
+  model.compile(loss='binary_crossentropy',
+              optimizer='rmsprop',
+              metrics=['accuracy']
+              )
+  
+
+  return model
+
+def train_model(model):
   # This adds extra versions of the photos to improve the training
   train_datagen = ImageDataGenerator(
           rescale = 1 / 255,
           shear_range = 0.2,
-  )
+          )
+
+  # This is the augmentation configuration we will use for testing:
+  # only rescaling
+  test_datagen = ImageDataGenerator(rescale=1. / 255)
+
+  train_generator = train_datagen.flow_from_directory(
+          TRAIN_DATA_DIR,
+          target_size=(IMG_WIDTH, IMG_HEIGHT),
+          batch_size=BATCH_SIZE,
+          class_mode='binary'
+            )
+
+  validation_generator = train_datagen.flow_from_directory(
+          TRAIN_DATA_DIR,
+          target_size=(IMG_WIDTH, IMG_HEIGHT),
+          batch_size=BATCH_SIZE,
+          class_mode='binary'
+          )
+
+  model.fit_generator(
+          train_generator,
+          steps_per_epoch = NB_VALIDATION_SAMPLES // BATCH_SIZE,
+          epochs = EPOCHS,
+          validation_data = validation_generator,
+          validation_steps = NB_VALIDATION_SAMPLES // BATCH_SIZE
+          )
+
+  return model
+
+def save_model(model):
+  model.save('saved_model.h5')
+
+
+
+
+
 
 
 def main():
-  myModel = none
+  myModel = None
   K.clear_session()
   gc.collect()
-  myModel = build_Model()
+  myModel = build_model()
   myModel = train_model(myModel)
   save_model(myModel)
 
