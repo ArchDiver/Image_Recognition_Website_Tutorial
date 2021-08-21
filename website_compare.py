@@ -165,15 +165,15 @@ def upload_file():
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
-        # If it doesn't look like an image file
-        if not allowed_file(file.filename):
-            flash('I only accept files of type'+str(ALLOWED_EXTENSIONS))
-            return redirect(request.url)
-        #When the user uploads a file with good parameters
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file', filename=filename))
+        # # If it doesn't look like an image file
+        # if not allowed_file(file.filename):
+        #     flash('I only accept files of type'+str(ALLOWED_EXTENSIONS))
+        #     return redirect(request.url)
+        # #When the user uploads a file with good parameters
+        # if file and allowed_file(file.filename):
+        #     filename = secure_filename(file.filename)
+        #     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        #     return redirect(url_for('uploaded_file', filename=filename))
 
     
 @app.route('/uploads/<filename>')
